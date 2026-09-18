@@ -1,0 +1,32 @@
+{
+  "name": "speed-cameras",
+  "version": "1.0.0",
+  "description": "A list of speed cameras",
+  "keywords": [
+    "speed",
+    "cameras",
+    "typescript"
+  ],
+  "homepage": "https://github.com/Ciriak/speed-cameras#readme",
+  "bugs": {
+    "url": "https://github.com/Ciriak/speed-cameras/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ciriak/speed-cameras.git"
+  },
+  "author": "Ciriak",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "fetch": "tsx scripts/fetcher.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.16",
+    "@types/node": "^26.6.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}

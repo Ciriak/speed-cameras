@@ -1,0 +1,25 @@
+{
+  "urlBase": "https://raw.githubusercontent.com/Ciriak/speed-cameras/master",
+  "defaults": {
+    "cameras": {
+      "file": "{code}-cameras.json",
+      "id": "speed-cameras-{code}",
+      "description": "Speed cameras in {country}",
+      "tags": ["speed-camera", "{countryTag}", "{code}"]
+    },
+    "areas": {
+      "file": "{code}-areas.json",
+      "id": "speed-areas-{code}",
+      "description": "Speed enforcement sections in {country}",
+      "tags": ["speed-area", "{countryTag}", "{code}"]
+    }
+  },
+  "countries": [
+    {
+      "code": "ch",
+      "cameras": {
+        "description": "🇨🇭👮 RADAR SWITZERLAND"
+      }
+    }
+  ]
+}
