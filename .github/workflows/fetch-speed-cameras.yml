@@ -1,0 +1,108 @@
+name: Fetch speed cameras
+
+# Runs monthly and on demand. By default every country in config.json is
+# fetched; a manual run can narrow that to one country code and can skip the
+# commit.
+on:
+  workflow_dispatch:
+    inputs:
+      country_code:
+        description: Two-letter ISO 3166-1 code, empty for all configured countries
+        required: false
+        default: ''
+        type: string
+      commit:
+        description: Commit and push the refreshed data
+        required: false
+        default: true
+        type: boolean
+  schedule:
+    # 03:17 UTC on the first day of every month.
+    - cron: '17 3 1 * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-speed-cameras
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    name: Fetch speed cameras (${{ inputs.country_code || 'all configured countries' }})
+    runs-on: ubuntu-latest
+    # A slow mirror can push the run past ten minutes; fail rather than hang.
+    timeout-minutes: 30
+    env:
+      COUNTRY_CODE_INPUT: ${{ inputs.country_code || 'ch' }}
+      # Optional repository variable, e.g. to pin a specific Overpass endpoint.
+      OVERPASS_URL: ${{ vars.OVERPASS_URL }}
+      # Optional repository variable, e.g. to point the `url` property at a CDN.
+      UPDATE_BASE_URL: ${{ vars.UPDATE_BASE_URL }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Resolve country code
+        run: |
+          set -euo pipefail
+
+          if [ -z "${COUNTRY_CODE_INPUT:-}" ]; then
+            echo "No country code given, using the countries from config.json."
+            exit 0
+          fi
+
+          code="$(printf '%s' "$COUNTRY_CODE_INPUT" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+          if ! printf '%s' "$code" | grep -Eq '^[a-z]{2}$'; then
+            echo "::error::country code must be a two-letter ISO 3166-1 code, got '${COUNTRY_CODE_INPUT}'"
+            exit 1
+          fi
+
+          echo "COUNTRY_CODE=$code" >> "$GITHUB_ENV"
+          echo "Country code: $code"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Fetch datapacks
+        run: npm run fetch
+
+      - name: Commit refreshed data
+        if: ${{ inputs.commit != false }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$(git status --porcelain -- '*-cameras.json' '*-areas.json')" ]; then
+            echo "No data changes to commit."
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- '*-cameras.json' '*-areas.json'
+          git commit -m "chore(data): refresh speed cameras (${COUNTRY_CODE:-all countries})"
+          # Push to the branch the run belongs to, even from a detached HEAD.
+          branch="${GITHUB_REF_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
+          git push origin "HEAD:${branch}"
+
+      - name: Summarise result
+        run: |
+          {
+            echo "### Speed camera data (${COUNTRY_CODE:-all configured countries})"
+            echo
+            for file in $(ls -1 ./*-cameras.json ./*-areas.json 2>/dev/null | xargs -n1 basename); do
+              if [ -f "$file" ]; then
+                echo "- \`$file\`: $(node -e "const p=require('./$file'); console.log(p.data.features.length + ' features, version ' + p.version)")"
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
