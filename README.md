@@ -124,10 +124,13 @@ runs the fetcher on the first day of every month (`17 3 1 * *`) and on demand
 from the Actions tab, where the run takes two inputs: the country code
 (default `ch`) and whether the refreshed data should be committed. When the
 data changed, the workflow commits the `*-cameras.json` / `*-areas.json` files
-back to the branch it runs on with the `github-actions[bot]` identity; the job
-also posts a short per-file summary on the run page. It needs the repository to
-allow Actions to write (`permissions: contents: write` is declared in the
-workflow, but its organisation/repository policy must permit it too).
+back to the branch it runs on with the `github-actions[bot]` identity, using the
+commit message `Updated to version <version>` (the OSM snapshot date the files
+were built from; when countries sit on different snapshots the subject carries
+the newest one and the body lists them per file). The job also posts a short
+per-file summary on the run page. It needs the repository to allow Actions to
+write (`permissions: contents: write` is declared in the workflow, but its
+organisation/repository policy must permit it too).
 
 ## Attribution
 
