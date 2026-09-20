@@ -1,2 +1,7 @@
 node_modules/
 .env
+
+# The datapacks are published to https://github.com/Ciriak/speed-cameras.
+# Generators write them into OUTPUT_DIR (the repo root by default).
+*-cameras.json
+*-areas.json

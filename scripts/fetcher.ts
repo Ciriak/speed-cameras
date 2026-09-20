@@ -7,6 +7,12 @@
  *   <country>-areas.json    enforcement sections as LineString/MultiLineString features
  *
  * Which countries are exported is configured in `config.json`.
+ *
+ * The datapacks belong to the `speed-cameras` data repository, not to this
+ * worker: they go into `OUTPUT_DIR` (default this repository, relative paths
+ * resolved against it), which the workflow points at a checkout of the data
+ * repository before committing and pushing it.
+ *
  * Data (c) OpenStreetMap contributors, available under the ODbL 1.0 licence.
  *
  * Usage:
@@ -14,8 +20,9 @@
  *   npm run fetch -- fr         # only France
  *   COUNTRY_CODE=de npm run fetch
  *   CONFIG_PATH=./other.json npm run fetch
+ *   OUTPUT_DIR=./data npm run fetch
  */
-import { readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
@@ -145,7 +152,7 @@ type CountrySnapshot = {
 
 const REPO_ROOT = resolve(__dirname, '..')
 
-const USER_AGENT = 'speed-cameras/1.0 (+https://github.com/Ciriak/speed-cameras)'
+const USER_AGENT = 'speed-cameras-worker/1.0 (+https://github.com/Ciriak/speed-cameras-worker)'
 const DEFAULT_MIRRORS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
@@ -163,10 +170,10 @@ const COUNTRY_CODE_PATTERN = /^[a-z]{2}$/
 const CONFIG_FILE_NAME = 'config.json'
 
 /**
- * Base of the `url` property, which points at the committed files. It targets
- * the default branch so the URL stays valid after a run on a side branch is
- * merged. `UPDATE_BASE_URL` overrides the config file, for example to serve the
- * data from a CDN.
+ * Base of the `url` property, which points at the files as committed to the
+ * `speed-cameras` data repository. It targets that repository's default branch
+ * so the URL stays valid after a run on a side branch is merged. `UPDATE_BASE_URL`
+ * overrides the config file, for example to serve the data from a CDN.
  */
 const DEFAULT_URL_BASE = 'https://raw.githubusercontent.com/Ciriak/speed-cameras/master'
 
@@ -458,9 +465,24 @@ export function resolveCountryCode(
   return argv.find((value) => value.trim().length > 0 && !value.startsWith('-')) ?? env.COUNTRY_CODE
 }
 
-export function resolveUrlBase(base: string | undefined = process.env.UPDATE_BASE_URL): string {
-  const trimmed = base?.trim()
+/**
+ * Base of the `url` property of every file: `UPDATE_BASE_URL` wins, then the
+ * `urlBase` of the config file, then the built-in default.
+ */
+export function resolveUrlBase(configuredBase?: string): string {
+  const override = process.env.UPDATE_BASE_URL?.trim()
+  const trimmed = override && override.length > 0 ? override : configuredBase?.trim()
   return (trimmed && trimmed.length > 0 ? trimmed : DEFAULT_URL_BASE).replace(/\/+$/, '')
+}
+
+/**
+ * Directory the datapack files are written to, relative to the repository root.
+ * The workflow sets `OUTPUT_DIR` to the checkout of the data repository; local
+ * runs write next to `config.json` unless it is set.
+ */
+export function resolveOutputDir(dir: string | undefined = process.env.OUTPUT_DIR): string {
+  const trimmed = dir?.trim()
+  return resolve(REPO_ROOT, trimmed && trimmed.length > 0 ? trimmed : '.')
 }
 
 export function buildFileUrl(fileName: string, base?: string): string {
@@ -751,12 +773,17 @@ function warnAboutStaleSnapshots(label: string, timestamps: string[]): void {
   }
 }
 
-async function writeDatapacks(files: { fileName: string; contents: DatapackFile }[]): Promise<string[]> {
+async function writeDatapacks(
+  files: { fileName: string; contents: DatapackFile }[],
+  outputDir: string,
+): Promise<string[]> {
   const staged: { target: string; temporary: string }[] = []
 
   try {
+    await mkdir(outputDir, { recursive: true })
+
     for (const file of files) {
-      const target = resolve(REPO_ROOT, file.fileName)
+      const target = resolve(outputDir, file.fileName)
       const temporary = `${target}.${process.pid}.tmp`
       await writeFile(temporary, `${JSON.stringify(file.contents, null, 2)}\n`, 'utf8')
       staged.push({ target, temporary })
@@ -832,8 +859,9 @@ async function fetchCountry(
 
 async function main(): Promise<void> {
   const override = process.env.OVERPASS_URL
-  const urlBase = resolveUrlBase()
   const config = await loadSpeedCamerasConfig()
+  const urlBase = resolveUrlBase(config.urlBase)
+  const outputDir = resolveOutputDir()
   const requested = resolveCountryCode()
   const countries = createCountryConfigs(config, requested ? [requested] : undefined)
 
@@ -842,6 +870,7 @@ async function main(): Promise<void> {
       `${requested ? ` [requested: ${requested.toLowerCase()}]` : ' [from config]'}`,
   )
   console.log(`url base: ${urlBase}`)
+  console.log(`output:   ${outputDir}`)
   console.log('')
 
   const results: CountrySnapshot[] = []
@@ -860,7 +889,7 @@ async function main(): Promise<void> {
     },
   ])
 
-  const written = await writeDatapacks(files)
+  const written = await writeDatapacks(files, outputDir)
 
   console.log('')
   for (const result of results) {

@@ -1,19 +1,19 @@
 {
   "name": "speed-cameras",
   "version": "1.0.0",
-  "description": "A list of speed cameras",
+  "description": "Fetches speed cameras from OpenStreetMap into the speed-cameras datapacks repository",
   "keywords": [
     "speed",
     "cameras",
     "typescript"
   ],
-  "homepage": "https://github.com/Ciriak/speed-cameras#readme",
+  "homepage": "https://github.com/Ciriak/speed-cameras-worker#readme",
   "bugs": {
-    "url": "https://github.com/Ciriak/speed-cameras/issues"
+    "url": "https://github.com/Ciriak/speed-cameras-worker/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Ciriak/speed-cameras.git"
+    "url": "git+https://github.com/Ciriak/speed-cameras-worker.git"
   },
   "author": "Ciriak",
   "type": "commonjs",
