@@ -1,6 +1,6 @@
 {
   "id": "speed-cameras-ch",
-  "version": "2026-09-20",
+  "version": "2026-10-13",
   "description": "🇨🇭👮 RADAR SWITZERLAND",
   "url": "https://raw.githubusercontent.com/Ciriak/speed-cameras/master/ch-cameras.json",
   "tags": [
@@ -1368,22 +1368,6 @@
           "coordinates": [
             8.3216535,
             47.0554236
-          ]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {
-          "label": "CAMERA",
-          "speed": 80,
-          "osmType": "node",
-          "osmId": 923913154
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [
-            6.6307583,
-            46.6234539
           ]
         }
       },
@@ -3432,6 +3416,7 @@
         "type": "Feature",
         "properties": {
           "label": "CAMERA",
+          "speed": 60,
           "osmType": "node",
           "osmId": 1984363427
         },
@@ -4500,22 +4485,6 @@
           "coordinates": [
             6.5872361,
             46.5612439
-          ]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {
-          "label": "CAMERA",
-          "speed": 80,
-          "osmType": "node",
-          "osmId": 3400152704
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [
-            6.5634455,
-            46.5654055
           ]
         }
       },
@@ -8440,6 +8409,7 @@
         "type": "Feature",
         "properties": {
           "label": "CAMERA",
+          "speed": 60,
           "osmType": "node",
           "osmId": 12126209003
         },
@@ -8455,6 +8425,7 @@
         "type": "Feature",
         "properties": {
           "label": "CAMERA",
+          "speed": 60,
           "osmType": "node",
           "osmId": 12126209004
         },
@@ -8470,6 +8441,7 @@
         "type": "Feature",
         "properties": {
           "label": "CAMERA",
+          "speed": 60,
           "osmType": "node",
           "osmId": 12126209005
         },
@@ -9223,6 +9195,85 @@
           "coordinates": [
             7.2498215,
             47.1338724
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "label": "CAMERA",
+          "speed": 50,
+          "osmType": "node",
+          "osmId": 14205964054
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            6.6065005,
+            46.538302
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "label": "CAMERA",
+          "speed": 50,
+          "osmType": "node",
+          "osmId": 14205974905
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            6.6064294,
+            46.5389006
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "label": "CAMERA",
+          "speed": 60,
+          "osmType": "node",
+          "osmId": 14206210096
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            6.5734125,
+            46.5378883
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "label": "CAMERA",
+          "osmType": "node",
+          "osmId": 14214007995
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            6.9576832,
+            46.3135701
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "label": "CAMERA",
+          "speed": 50,
+          "osmType": "node",
+          "osmId": 14224780664
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            6.2335249,
+            46.3747151
           ]
         }
       }
